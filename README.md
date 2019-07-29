@@ -6,7 +6,7 @@ LSDBLK
 # Requirements
 
 ```
-$ apt-get install util-linux
+$ apt-get install util-linux    # lsblk
 ```
 
 # Introduction
