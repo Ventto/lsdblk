@@ -1,4 +1,4 @@
-LSDBLK
+Lsdblk
 ======
 
 *"List all the data partitions of a given block device"*
