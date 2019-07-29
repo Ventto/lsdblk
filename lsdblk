@@ -1,0 +1,75 @@
+#!/bin/sh
+
+#set -x
+
+FILTER="swap"
+
+usage()
+{
+    desc="List all the data partition of a given block device.
+
+Option:
+  -h    Prints this help and exits.
+
+Argument:
+  DEVICE       any block device path, ex: /dev/sda"
+    printf "Usage: %s [-h] DEVICE\n\n%s\n" "$(basename "$0")" "$desc"
+}
+
+checkargs()
+{
+    while getopts 'h' opt; do
+        case $opt in
+            h)  usage; exit;;
+            \?) usage; exit 2;;
+            *) ;;
+        esac
+    done
+
+    [ "$#" -ne 1 ] && { usage; exit 2; }
+
+    if [ ! -b "$1" ]; then
+        printf "%s: block device not found or read-protected\n" "$1"
+        exit 1
+    fi
+}
+
+_lsdblk()
+{
+    _dev="$1"
+
+    if ! lsblk "$_dev" >/dev/null 2>&1; then
+        return 1
+    fi
+
+    part_ls="$(lsblk -r -f -p -n "$_dev" \
+                | grep -v "$_dev " | cut -d' ' -f1)"
+
+    if [ -z "$part_ls" ]; then
+        lsblk -r -f -p -n "$_dev" | cut -d' ' -f1,2 | grep -Ev "(${FILTER})$"
+        return
+    fi
+
+    for partition in $part_ls; do
+        _lsdblk "$partition" false
+    done
+}
+
+lsdblk()
+{
+    checkargs "$@"
+
+    _dev="$1"
+
+    part_info="$(_lsdblk "$_dev")"
+    ret="$?"
+
+    if [ "$ret" -ne 0 ]; then
+        echo "${_dev}: no partition found"
+        exit 1
+    fi
+
+    echo "$part_info" | sort -u
+}
+
+lsdblk "$@"
