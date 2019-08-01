@@ -46,7 +46,7 @@ checkargs()
     fi
 }
 
-_lsdblk()
+lsdblk()
 {
     _dev="$1"
 
@@ -63,17 +63,17 @@ _lsdblk()
     fi
 
     for partition in $part_ls; do
-        _lsdblk "$partition" false
+        lsdblk "$partition" false
     done
 }
 
-lsdblk()
+main()
 {
     checkargs "$@"
 
     _dev="$1"
 
-    part_info="$(_lsdblk "$_dev")"
+    part_info="$(lsdblk "$_dev")"
     ret="$?"
 
     if [ "$ret" -ne 0 ]; then
@@ -84,4 +84,4 @@ lsdblk()
     echo "$part_info" | sort -u
 }
 
-lsdblk "$@"
+main "$@"
